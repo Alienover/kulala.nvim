@@ -1,11 +1,19 @@
 local FS = require("kulala.utils.fs")
 local M = {}
 
+--- @alias ConfigDefaultView 'headers' | "body" | "headers_body"
+M.preset_views = {
+  HEADERS_VIEW = "headers",
+  BODY_VIEW = "body",
+  HEADERS_BODY_VIEW = "headers_body",
+}
+
 M.defaults = {
   -- split direction
   -- possible values: "vertical", "horizontal"
   split_direction = "vertical",
   -- default_view, body or headers or headers_body
+  --- @type ConfigDefaultView
   default_view = "body",
   -- dev, test, prod, can be anything
   -- see: https://learn.microsoft.com/en-us/aspnet/core/test/http-files?view=aspnetcore-8.0#environment-files
