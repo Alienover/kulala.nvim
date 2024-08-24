@@ -445,14 +445,7 @@ function M.parse(start_request_linenr)
   end
 
   -- build the command to exectute the request
-  table.insert(res.cmd, "curl")
-  table.insert(res.cmd, "-s")
-  table.insert(res.cmd, "-D")
-  table.insert(res.cmd, PLUGIN_TMP_DIR .. "/headers.txt")
-  table.insert(res.cmd, "-o")
-  table.insert(res.cmd, PLUGIN_TMP_DIR .. "/body.txt")
-  table.insert(res.cmd, "-X")
-  table.insert(res.cmd, res.method)
+  res.cmd = { "curl", "-s", "-X", res.method }
   if res.headers["content-type"] ~= nil and res.body ~= nil then
     -- check if we are a graphql query
     -- we need this here, because the user could have defined the content-type
