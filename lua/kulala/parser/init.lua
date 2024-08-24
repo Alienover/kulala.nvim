@@ -38,7 +38,7 @@ local function parse_string_variables(str, variables, env)
     end
     return value
   end
-  local result = str:gsub("{{(.-)}}", replace_placeholder)
+  local result = (str or ""):gsub("{{(.-)}}", replace_placeholder)
   return result
 end
 
