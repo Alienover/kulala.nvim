@@ -8,6 +8,12 @@ M.preset_views = {
   HEADERS_BODY_VIEW = "headers_body",
 }
 
+M.views_order = {
+  M.preset_views.HEADERS_BODY_VIEW,
+  M.preset_views.HEADERS_VIEW,
+  M.preset_views.BODY_VIEW,
+}
+
 M.defaults = {
   -- split direction
   -- possible values: "vertical", "horizontal"

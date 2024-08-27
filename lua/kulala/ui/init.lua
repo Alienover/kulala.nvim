@@ -3,6 +3,9 @@ local FORMATTER = require("kulala.formatter")
 local FS = require("kulala.utils.fs")
 local GLOBALS = require("kulala.globals")
 local INT_PROCESSING = require("kulala.internal_processing")
+
+local UICallbacks = require("kulala.ui.callbacks")
+local Winbar = require("kulala.ui.winbar")
 local ResultUI = require("kulala.ui.result")
 local ScratchPad = require("kulala.ui.scratchpad")
 
@@ -46,11 +49,21 @@ M.render_result = function(request, opts)
   opts =
     vim.tbl_extend("force", { append = false, highlight = true }, opts or {})
 
-  local contenttype = INT_PROCESSING.get_config_contenttype()
-
   if not opts.append then
     ResultUI.open()
+
+    for _, callback in ipairs(UICallbacks.get("on_replace_buffer")) do
+      callback(ResultUI.context.buffer)
+    end
   end
+
+  M.update_result(request, opts)
+end
+
+--- @param request Request
+--- @param opts RenderOpts | nil
+M.update_result = function(request, opts)
+  local contenttype = INT_PROCESSING.get_config_contenttype()
 
   ResultUI.render(CONFIG.get().default_view, {
     headers = contents.headers(function(content)
@@ -64,6 +77,10 @@ M.render_result = function(request, opts)
     body = contents.body(contenttype.formatter),
     filetype = contenttype.ft,
   }, opts)
+
+  if CONFIG.get().winbar then
+    Winbar.update(ResultUI.context.window, ResultUI.context.buffer)
+  end
 end
 
 M.close_result = function()

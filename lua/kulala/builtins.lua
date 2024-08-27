@@ -9,6 +9,7 @@ local ENV = require("kulala.parser.env")
 local UI = require("kulala.ui")
 local DB = require("kulala.db")
 
+local Logger = require("kulala.logger")
 local Graphql = require("kulala.graphql")
 local Inspect = require("kulala.parser.inspect")
 local ScriptsUtils = require("kulala.scripts.utils")
@@ -163,25 +164,37 @@ local builtins = {
   },
   toggle_view = {
     desc = "Switch the view between `headers`, `body`, and `headers_body`",
-    handler = function()
-      local default_view = CONFIG.get().default_view
-
-      local views = {
-        CONFIG.preset_views.HEADERS_VIEW,
-        CONFIG.preset_views.BODY_VIEW,
-        CONFIG.preset_views.HEADERS_BODY_VIEW,
-      }
-
-      local next = 1
-      for idx, view in ipairs(views) do
-        if view == default_view then
-          next = (idx % #views) + 1
-        end
+    handler = function(next_view)
+      local delta = 1
+      local view_idx = tonumber(next_view)
+      if type(view_idx) == "number" and (view_idx == 1 or view_idx == -1) then
+        delta = view_idx
       end
 
-      CONFIG.set({ default_view = views[next] })
+      if
+        not next_view or not vim.tbl_contains(CONFIG.views_order, next_view)
+      then
+        local default_view = CONFIG.get().default_view
 
-      UI.render_result(DB.data.current_request)
+        local next = 0
+        for idx, view in ipairs(CONFIG.views_order) do
+          if view == default_view then
+            next = (idx + delta) % #CONFIG.views_order
+            next = next == 0 and #CONFIG.views_order or next
+            break
+          end
+        end
+
+        next_view = CONFIG.views_order[next]
+      end
+
+      if next_view then
+        CONFIG.set({ default_view = next_view })
+
+        UI.update_result(DB.data.current_request, {})
+      else
+        Logger.error("Invalid view to display")
+      end
     end,
   },
 
